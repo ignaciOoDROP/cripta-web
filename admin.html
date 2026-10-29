@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Panel CRIPTA</title>
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--side:#0f0f11;--card:#141416;--card2:#1a1a1d;--line:#26262b;--text:#f6f4ee;--muted:#a3a09a;--muted2:#7d7a74;--y:#ffc400;--y2:#ffd84d;--ink:#0a0a0b;--ok:#5fd38d;--bad:#ff6b6b;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+.app{display:grid;grid-template-columns:240px minmax(380px,1fr) 1.15fr;height:100dvh}
+.app.no-preview{grid-template-columns:240px 1fr}
+.app.no-preview .preview{display:none}
+
+/* menú lateral */
+.side{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:auto}
+.side-brand{display:flex;align-items:center;gap:10px;padding:20px 18px 16px}
+.side-brand img{width:34px;height:34px;padding:4px;border-radius:10px;background:#000;border:1px solid var(--line)}
+.side-brand b{font:700 15px Unbounded,sans-serif;letter-spacing:.1em;display:block}
+.side-brand small{color:var(--muted2);font-size:12px}
+.menu{display:flex;flex-direction:column;gap:2px;padding:6px 10px}
+.menu button{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-radius:10px;border:0;background:none;cursor:pointer;color:var(--muted);font-weight:600}
+.menu button:hover{background:var(--card);color:var(--text)}
+.menu button[aria-current="true"]{background:var(--card2);color:var(--y);box-shadow:inset 3px 0 0 var(--y)}
+.menu .ic{width:22px;text-align:center}
+.menu-sep{height:1px;background:var(--line);margin:8px 6px}
+.side-foot{margin-top:auto;padding:14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line)}
+
+/* editor */
+.editor{overflow:auto;padding:26px clamp(18px,3vw,36px) 120px;position:relative}
+.editor h1{font:700 22px Unbounded,sans-serif;margin:0 0 4px}
+.editor .sub{color:var(--muted);margin:0 0 24px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field label{font-size:13px;font-weight:700;color:var(--muted)}
+.field small{color:var(--muted2);font-size:12px}
+input[type=text],input[type=number],input[type=url],input[type=password],textarea,select{width:100%;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);outline:0;transition:border-color .2s}
+textarea{min-height:92px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--y)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.box-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.box-head b{font-size:13px;color:var(--y);font-family:'JetBrains Mono',monospace}
+.box .field:last-child{margin-bottom:0}
+.box input,.box textarea{background:var(--bg)}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.row input{flex:1}
+.icon-btn{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card2);cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.icon-btn:hover{color:var(--text);border-color:var(--muted2)}
+.icon-btn.del:hover{color:var(--bad);border-color:var(--bad)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--card2);cursor:pointer;font-weight:700;text-decoration:none;color:var(--text);transition:transform .2s,background .2s,border-color .2s}
+.btn:hover{transform:translateY(-1px);border-color:var(--muted2)}
+.btn-y{background:var(--y);color:var(--ink);border-color:var(--y)}
+.btn-y:hover{background:var(--y2);border-color:var(--y2)}
+.btn-add{width:100%;border-style:dashed;color:var(--y);background:none}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.note{padding:14px 16px;border-radius:12px;background:rgba(255,196,0,.08);border:1px solid rgba(255,196,0,.3);color:var(--text);margin-bottom:18px;font-size:14px}
+.note b{color:var(--y)}
+.note.ok{background:rgba(95,211,141,.08);border-color:rgba(95,211,141,.35)}
+.note.bad{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.4)}
+ol.how{padding-left:20px;margin:0 0 18px;color:var(--muted)}
+ol.how li{margin-bottom:8px}
+ol.how b{color:var(--text)}
+ol.how a{color:var(--y)}
+
+/* fotos */
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.photo{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--line)}
+.photo img{width:100%;height:100%;object-fit:cover}
+.photo .tools{position:absolute;inset:auto 6px 6px;display:flex;gap:6px;justify-content:flex-end}
+.photo .tools button{width:32px;height:32px;border-radius:9px;border:0;background:rgba(10,10,11,.85);cursor:pointer;color:var(--text)}
+.photo .tools button:hover{color:var(--y)}
+.photo .new{position:absolute;top:6px;left:6px;padding:3px 8px;border-radius:6px;background:var(--y);color:var(--ink);font-size:11px;font-weight:800}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:22px;border-radius:14px;border:1.5px dashed var(--line);color:var(--muted);cursor:pointer;text-align:center}
+.drop:hover,.drop.over{border-color:var(--y);color:var(--y)}
+
+/* stock */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted2);font-weight:700;font-size:12px;position:sticky;top:0;background:var(--bg)}
+td img{width:46px;height:36px;object-fit:contain;background:#f3f1ec;border-radius:6px;padding:2px}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.tag.disponible{background:rgba(95,211,141,.15);color:var(--ok)}
+.tag.vendida{background:#26262b;color:var(--muted2)}
+.tag.a-pedido{background:rgba(255,196,0,.15);color:var(--y)}
+
+/* vista previa */
+.preview{border-left:1px solid var(--line);display:flex;flex-direction:column;background:#000}
+.preview-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--side)}
+.preview-bar span{font-size:13px;color:var(--muted)}
+.preview-bar .seg{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
+.preview-bar .seg button{border:0;background:none;padding:6px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted)}
+.preview-bar .seg button[aria-pressed="true"]{background:var(--card2);color:var(--y)}
+.frame-wrap{flex:1;display:flex;justify-content:center;overflow:hidden;background:#050505}
+iframe{border:0;width:100%;height:100%;background:var(--bg);transition:width .35s}
+.frame-wrap.mobile iframe{width:390px;border-inline:1px solid var(--line)}
+
+/* barra de estado */
+.status{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:12px;padding:10px 10px 10px 18px;border-radius:16px;background:var(--card2);border:1px solid var(--line);box-shadow:0 20px 40px -12px rgba(0,0,0,.7)}
+.status .dot{width:9px;height:9px;border-radius:50%;background:var(--ok)}
+.status.dirty .dot{background:var(--y);box-shadow:0 0 0 4px rgba(255,196,0,.2)}
+.status span{font-size:14px;font-weight:600;white-space:nowrap}
+.toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-150%);opacity:0;z-index:30;padding:12px 18px;border-radius:12px;background:var(--text);color:var(--ink);font-weight:700;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+.mobile-top{display:none}
+@media (max-width:1100px){
+  .app,.app.no-preview{grid-template-columns:220px 1fr}
+  .preview{display:none}
+}
+@media (max-width:720px){
+  .app,.app.no-preview{grid-template-columns:1fr;height:auto}
+  .side{position:sticky;top:0;z-index:10;border-right:0;border-bottom:1px solid var(--line)}
+  .side-brand{padding:12px 14px 8px}
+  .menu{flex-direction:row;overflow-x:auto;padding:4px 10px 10px}
+  .menu button{flex:none;white-space:nowrap}
+  .menu-sep,.side-foot{display:none}
+  .editor{padding-bottom:140px}
+  .status{left:12px;right:12px;transform:none;justify-content:space-between}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side">
+    <div class="side-brand"><img src="img/logo.svg" alt=""><div><b>CRIPTA</b><small>Panel de edición</small></div></div>
+    <nav class="menu" id="menu" aria-label="Secciones"></nav>
+    <div class="side-foot">
+      <a class="btn" href="index.html" target="_blank" rel="noopener">Ver la web publicada ↗</a>
+      <button class="btn" id="toggle-preview" type="button">Ocultar vista previa</button>
+    </div>
+  </aside>
+
+  <main class="editor" id="editor"></main>
+
+  <section class="preview" aria-label="Vista previa">
+    <div class="preview-bar">
+      <span>Vista previa en vivo</span>
+      <div class="seg" role="group" aria-label="Tamaño">
+        <button type="button" data-size="desk" aria-pressed="true">Compu</button>
+        <button type="button" data-size="mobile" aria-pressed="false">Celular</button>
+      </div>
+    </div>
+    <div class="frame-wrap" id="frame-wrap"><iframe id="frame" title="Vista previa de la web"></iframe></div>
+  </section>
+</div>
+
+<div class="status" id="status">
+  <span class="dot"></span><span id="status-txt">Todo publicado</span>
+  <button class="btn" id="btn-preview" type="button">Vista previa</button>
+  <button class="btn btn-y" id="btn-publish" type="button">Publicar</button>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<input type="file" id="file" accept="image/*" multiple hidden>
+
+<script>
+(function(){
+'use strict';
+var $ = function(s, el){ return (el || document).querySelector(s); };
+var $$ = function(s, el){ return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function get(o, p){ return p.split('.').reduce(function(a,k){ return a == null ? a : a[k]; }, o); }
+function set(o, p, v){ var ks = p.split('.'), last = ks.pop(); ks.forEach(function(k){ if (o[k] == null) o[k] = {}; o = o[k]; }); o[last] = v; }
+
+var BORRADOR = 'cripta-borrador', PENDIENTES = 'cripta-fotos-nuevas', GH = 'cripta-github';
+var C = null, original = '', fotosNuevas = {};
+function store(k, v){ try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch(e) { toast('No se pudo guardar el borrador en este navegador'); } }
+function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
+
+/* ---------- secciones del menú ---------- */
+var SECCIONES = [
+  { id:'portada', ic:'★', nombre:'Portada', sub:'Lo primero que se ve al entrar.', campos:[
+    ['hero.etiqueta','Etiqueta chica (arriba del título)'],
+    ['hero.titulo','Título — parte blanca'],
+    ['hero.tituloResaltado','Título — parte amarilla'],
+    ['hero.bajada','Texto debajo del título','area'],
+    ['hero.botonPrincipal','Botón amarillo'],
+    ['hero.botonSecundario','Botón secundario'] ] },
+  { id:'barra', ic:'≡', nombre:'Barra y marcas', sub:'Los mensajes de la barra amarilla de arriba y las marcas que pasan en la cinta.', listas:[
+    ['barraSuperior','Mensajes de la barra amarilla','Agregar mensaje'],
+    ['marcas','Marcas de la cinta','Agregar marca'] ] },
+  { id:'beneficios', ic:'✓', nombre:'Beneficios', sub:'Las 4 tarjetas debajo de la portada.', objetos:['beneficios','Beneficio',[['icono','Ícono (un emoji o símbolo)'],['titulo','Título'],['texto','Texto']],{icono:'★',titulo:'',texto:''}] },
+  { id:'catalogo', ic:'▦', nombre:'Catálogo', sub:'Títulos de la sección de productos. Los productos se cargan desde la planilla (ver "Stock").', campos:[
+    ['catalogo.etiqueta','Etiqueta chica'],['catalogo.titulo','Título'],['catalogo.bajada','Texto','area'] ] },
+  { id:'vender', ic:'⇄', nombre:'Vendé tu placa', sub:'El bloque para que te vendan o cambien componentes.', campos:[
+    ['vender.etiqueta','Etiqueta chica'],['vender.titulo','Título'],['vender.bajada','Texto','area'] ],
+    listas:[['vender.lista','Puntos con tilde','Agregar punto']] },
+  { id:'pasos', ic:'➜', nombre:'Cómo comprar', sub:'Los pasos numerados.', objetos:['pasos','Paso',[['titulo','Título'],['texto','Texto','area']],{titulo:'',texto:''}] },
+  { id:'preguntas', ic:'?', nombre:'Preguntas', sub:'Preguntas frecuentes que se abren y cierran.', objetos:['preguntas','Pregunta',[['pregunta','Pregunta'],['respuesta','Respuesta','area']],{pregunta:'',respuesta:''}] },
+  { id:'cierre', ic:'◆', nombre:'Cierre y pie', sub:'El bloque amarillo del final y el texto del pie de página.', campos:[
+    ['cierre.titulo','Título del bloque amarillo'],['cierre.bajada','Texto del bloque amarillo','area'],['cierre.boton','Botón'],['pie.texto','Texto del pie de página','area'] ] },
+  { id:'fotos', ic:'◫', nombre:'Fotos Instagram', sub:'Las fotos de la sección "Lo que entra, primero en @cripta.tec".', custom:fotosUI },
+  'sep',
+  { id:'stock', ic:'▤', nombre:'Stock y precios', sub:'Tu stock sale de la planilla de Google. Lo que cambies ahí aparece en la web al instante.', custom:stockUI },
+  { id:'ajustes', ic:'⚙', nombre:'Ajustes', sub:'Datos de contacto y conexión con la planilla.', campos:[
+    ['ajustes.whatsapp','Número de WhatsApp (con 549, sin + ni espacios)'],
+    ['ajustes.mensajeWhatsApp','Mensaje que se arma al tocar "WhatsApp"'],
+    ['ajustes.instagram','Usuario de Instagram (sin @)'],
+    ['ajustes.seguidoresInstagram','Seguidores de Instagram (para el contador)','num'],
+    ['ajustes.ciudad','Ciudad'],
+    ['ajustes.planillaEditar','Link para editar la planilla'],
+    ['ajustes.planilla','Link CSV publicado de la planilla (Archivo › Compartir › Publicar en la web › CSV)','area'] ] },
+  { id:'publicar', ic:'⬆', nombre:'Publicar', sub:'Subí los cambios a la web real.', custom:publicarUI }
+];
+var actual = 'portada';
+
+function armarMenu(){
+  $('#menu').innerHTML = SECCIONES.map(function(s){
+    return s === 'sep' ? '<div class="menu-sep"></div>' : '<button type="button" data-id="' + s.id + '"><span class="ic">' + s.ic + '</span>' + s.nombre + '</button>';
+  }).join('');
+  $$('#menu button').forEach(function(b){ b.onclick = function(){ ir(b.dataset.id); }; });
+}
+function ir(id){
+  actual = id;
+  $$('#menu button').forEach(function(b){ b.setAttribute('aria-current', b.dataset.id === id); });
+  try { location.hash = id; } catch(e) {}
+  pintar();
+  $('#editor').scrollTop = 0;
+}
+
+/* ---------- editores ---------- */
+function campo(path, label, tipo){
+  var v = get(C, path); if (v == null) v = '';
+  var id = 'f-' + path.replace(/\W/g,'-');
+  var input = tipo === 'area' ? '<textarea id="' + id + '" data-path="' + path + '">' + esc(v) + '</textarea>'
+    : '<input id="' + id + '" type="' + (tipo === 'num' ? 'number' : 'text') + '" data-path="' + path + '" value="' + esc(v) + '"' + (tipo === 'num' ? ' data-num' : '') + '>';
+  return '<div class="field"><label for="' + id + '">' + esc(label) + '</label>' + input + '</div>';
+}
+function lista(path, label, agregar){
+  var arr = get(C, path) || [];
+  return '<div class="field"><label>' + esc(label) + '</label>' + arr.map(function(t, i){
+    return '<div class="row"><input type="text" aria-label="' + esc(label) + ' ' + (i+1) + '" data-list="' + path + '" data-i="' + i + '" value="' + esc(t) + '">' +
+      '<button class="icon-btn" type="button" data-up="' + path + '" data-i="' + i + '" aria-label="Subir">↑</button>' +
+      '<button class="icon-btn del" type="button" data-del="' + path + '" data-i="' + i + '" aria-label="Borrar">✕</button></div>';
+  }).join('') + '<button class="btn btn-add" type="button" data-addlist="' + path + '">+ ' + esc(agregar) + '</button></div>';
+}
+function objetos(cfg){
+  var path = cfg[0], nombre = cfg[1], campos = cfg[2], arr = get(C, path) || [];
+  return arr.map(function(o, i){
+    return '<div class="box"><div class="box-head"><b>' + esc(nombre) + ' ' + (i+1) + '</b><span style="display:flex;gap:6px">' +
+      '<button class="icon-btn" type="button" data-up="' + path + '" data-i="' + i + '" aria-label="Subir">↑</button>' +
+      '<button class="icon-btn del" type="button" data-del="' + path + '" data-i="' + i + '" aria-label="Borrar">✕</button></span></div>' +
+      campos.map(function(c){ return campo(path + '.' + i + '.' + c[0], c[1], c[2]); }).join('') + '</div>';
+  }).join('') + '<button class="btn btn-add" type="button" data-addobj="' + path + '">+ Agregar ' + esc(nombre.toLowerCase()) + '</button>';
+}
+
+function pintar(){
+  var s = SECCIONES.filter(function(x){ return x.id === actual; })[0];
+  var ed = $('#editor');
+  var html = '<h1>' + esc(s.nombre) + '</h1><p class="sub">' + esc(s.sub) + '</p>';
+  if (s.campos) html += s.campos.map(function(c){ return campo(c[0], c[1], c[2]); }).join('');
+  if (s.listas) html += s.listas.map(function(l){ return lista(l[0], l[1], l[2]); }).join('');
+  if (s.objetos) html += objetos(s.objetos);
+  ed.innerHTML = html;
+  if (s.custom) s.custom(ed);
+  conectar(ed, s);
+}
+function conectar(ed, s){
+  $$('[data-path]', ed).forEach(function(el){
+    el.oninput = function(){
+      var v = el.hasAttribute('data-num') ? (Number(el.value) || 0) : el.value;
+      var p = el.dataset.path.split('.');
+      // rutas como "pasos.0.titulo"
+      var o = C; for (var i = 0; i < p.length - 1; i++) { if (o[p[i]] == null) o[p[i]] = {}; o = o[p[i]]; }
+      o[p[p.length - 1]] = v;
+      cambio();
+    };
+  });
+  $$('[data-list]', ed).forEach(function(el){
+    el.oninput = function(){ get(C, el.dataset.list)[Number(el.dataset.i)] = el.value; cambio(); };
+  });
+  $$('[data-addlist]', ed).forEach(function(b){
+    b.onclick = function(){ var p = b.dataset.addlist; if (!get(C, p)) set(C, p, []); get(C, p).push(''); cambio(); pintar(); var ins = $$('[data-list="' + p + '"]'); if (ins.length) ins[ins.length-1].focus(); };
+  });
+  $$('[data-addobj]', ed).forEach(function(b){
+    b.onclick = function(){ var p = b.dataset.addobj; if (!get(C, p)) set(C, p, []); get(C, p).push(JSON.parse(JSON.stringify(s.objetos[3]))); cambio(); pintar(); };
+  });
+  $$('[data-del]', ed).forEach(function(b){
+    b.onclick = function(){ get(C, b.dataset.del).splice(Number(b.dataset.i), 1); cambio(); pintar(); toast('Borrado'); };
+  });
+  $$('[data-up]', ed).forEach(function(b){
+    b.onclick = function(){ var a = get(C, b.dataset.up), i = Number(b.dataset.i); if (!i) return; var t = a[i]; a[i] = a[i-1]; a[i-1] = t; cambio(); pintar(); };
+  });
+}
+
+/* ---------- fotos de Instagram ---------- */
+function fotoSrc(path){ return fotosNuevas[path] || path; }
+function fotosUI(ed){
+  var arr = C.fotosInstagram || (C.fotosInstagram = []);
+  var html = '<div class="photos">' + arr.map(function(p, i){
+    return '<div class="photo"><img src="' + esc(fotoSrc(p)) + '" alt="Foto ' + (i+1) + '">' + (fotosNuevas[p] ? '<span class="new">NUEVA</span>' : '') +
+      '<div class="tools"><button type="button" data-fup="' + i + '" aria-label="Mover antes">←</button><button type="button" data-fdel="' + i + '" aria-label="Quitar">✕</button></div></div>';
+  }).join('') + '</div>' +
+  '<div class="drop" id="drop" tabindex="0" role="button"><b>+ Subir fotos</b><small>Tocá acá o arrastrá fotos. Se achican solas para que la web cargue rápido.</small></div>' +
+  '<p class="sub" style="margin-top:14px">Se muestran 8 en la web (en el orden de arriba). Las fotos nuevas se suben cuando tocás <b>Publicar</b>.</p>';
+  ed.insertAdjacentHTML('beforeend', html);
+  $$('[data-fdel]', ed).forEach(function(b){ b.onclick = function(){ var p = arr.splice(Number(b.dataset.fdel), 1)[0]; if (fotosNuevas[p]) { delete fotosNuevas[p]; store(PENDIENTES, fotosNuevas); } cambio(); pintar(); }; });
+  $$('[data-fup]', ed).forEach(function(b){ b.onclick = function(){ var i = Number(b.dataset.fup); if (!i) return; var t = arr[i]; arr[i] = arr[i-1]; arr[i-1] = t; cambio(); pintar(); }; });
+  var drop = $('#drop', ed), file = $('#file');
+  drop.onclick = drop.onkeydown = function(e){ if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return; e.preventDefault(); file.click(); };
+  drop.ondragover = function(e){ e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = function(){ drop.classList.remove('over'); };
+  drop.ondrop = function(e){ e.preventDefault(); drop.classList.remove('over'); agregarFotos(e.dataTransfer.files); };
+  file.onchange = function(){ agregarFotos(file.files); file.value = ''; };
+}
+function achicar(f, max){
+  return new Promise(function(ok, mal){
+    var img = new Image(), url = URL.createObjectURL(f);
+    img.onload = function(){
+      var k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      ok(c.toDataURL('image/webp', .82));
+    };
+    img.onerror = mal; img.src = url;
+  });
+}
+function agregarFotos(files){
+  var arr = C.fotosInstagram;
+  Promise.all(Array.prototype.map.call(files, function(f){
+    return achicar(f, 900).then(function(data){
+      var path = 'img/subidas/' + Date.now() + '-' + Math.random().toString(36).slice(2,6) + '.webp';
+      fotosNuevas[path] = data; arr.unshift(path);
+    });
+  })).then(function(){ store(PENDIENTES, fotosNuevas); cambio(); pintar(); toast('Fotos agregadas'); })
+    .catch(function(){ toast('No se pudo leer una de las fotos'); });
+}
+
+/* ---------- stock ---------- */
+function stockUI(ed){
+  var a = C.ajustes || {};
+  ed.insertAdjacentHTML('beforeend',
+    '<div class="note"><b>¿Cómo cambio precios o marco algo vendido?</b><br>Abrí la planilla, cambiá la fila y listo: la web lo toma sola en segundos (no hace falta tocar "Publicar").<br>' +
+    'Columnas: <b>Marca · Modelo · VRAM · Uso</b> (1080p, 1440p o 4K) <b>· Precio · Foto</b> (link de la imagen) <b>· Vendida</b> (sí/no) <b>· Destacada</b> (sí/no, sale en la portada). Si el modelo dice "(A PEDIDO)", se muestra como a pedido.</div>' +
+    '<p style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-y" target="_blank" rel="noopener" href="' + esc(a.planillaEditar || '#') + '">Abrir planilla ↗</a><button class="btn" type="button" id="reload-stock">Actualizar lista</button></p>' +
+    '<div id="stock-tabla"><p class="sub">Cargando la planilla…</p></div>');
+  $('#reload-stock').onclick = function(){ cargarTabla(); };
+  cargarTabla();
+}
+function cargarTabla(){
+  var t = $('#stock-tabla'); if (!t) return;
+  var url = (C.ajustes || {}).planilla;
+  if (!url) {
+    var ps = C.productos || [], disp = ps.filter(function(p){ return p.estado !== 'vendida'; }).length;
+    t.innerHTML = '<div class="note bad"><b>La planilla está en pausa.</b> Tu Google Drive se quedó sin espacio y no deja editarla, así que por ahora el stock está cargado directo en la web (lo actualiza Claude). Cuando liberes espacio, se vuelve a conectar.</div>' +
+      '<p class="sub"><b style="color:var(--text)">' + disp + '</b> en venta · ' + (ps.length - disp) + ' vendidas</p><table><thead><tr><th></th><th>Producto</th><th>Precio</th><th>Estado</th></tr></thead><tbody>' +
+      ps.map(function(p){ return '<tr><td>' + (p.foto ? '<img src="' + esc(p.foto) + '" alt="" loading="lazy">' : '') + '</td><td><b>' + esc(p.marca) + '</b> ' + esc(p.modelo) + (p.oferta ? ' <span class="tag a-pedido">OFERTA</span>' : '') + '</td><td>$' + Number(p.precio).toLocaleString('es-AR') + '</td><td><span class="tag ' + p.estado + '">' + p.estado + '</span></td></tr>'; }).join('') + '</tbody></table>';
+    return;
+  }
+  fetch(url + '&t=' + Date.now()).then(function(r){ if (!r.ok) throw 0; return r.text(); }).then(function(txt){
+    var rows = parseCSV(txt).filter(function(r){ return r.some(function(c){ return c.trim(); }); });
+    var head = rows.shift().map(function(h){ return h.trim().toLowerCase(); });
+    var col = function(r, n){ var i = head.indexOf(n); return i >= 0 ? (r[i] || '').trim() : ''; };
+    var si = function(v){ return /^(si|sí|s|x|yes|true|1|vendida)$/i.test(v.trim()); };
+    var disp = 0;
+    var filas = rows.map(function(r){
+      var vend = si(col(r,'vendida')), ped = /a pedido/i.test(col(r,'modelo'));
+      var st = vend ? 'vendida' : ped ? 'a-pedido' : 'disponible'; if (!vend) disp++;
+      var foto = col(r,'foto'); if (/^data:/.test(foto)) foto = '';
+      var local = (C.productos || []).filter(function(p){ return p.marca === col(r,'marca') && col(r,'modelo').replace(/​/g,'').indexOf(p.modelo) === 0; })[0];
+      if (!/^(img\/|https?:)/.test(foto) && local) foto = local.foto;
+      return '<tr><td>' + (foto ? '<img src="' + esc(foto) + '" alt="" loading="lazy">' : '') + '</td><td><b>' + esc(col(r,'marca')) + '</b> ' + esc(col(r,'modelo')) +
+        (si(col(r,'destacada')) ? ' <span class="tag a-pedido">★</span>' : '') + '</td><td>' + esc(col(r,'precio')) + '</td><td><span class="tag ' + st + '">' + st.replace('-', ' ') + '</span></td></tr>';
+    });
+    t.innerHTML = '<p class="sub"><b style="color:var(--text)">' + disp + '</b> en venta · ' + (rows.length - disp) + ' vendidas</p><table><thead><tr><th></th><th>Producto</th><th>Precio</th><th>Estado</th></tr></thead><tbody>' + filas.join('') + '</tbody></table>';
+  }).catch(function(){ t.innerHTML = '<div class="note bad">No se pudo leer la planilla. Revisá que siga publicada en la web (Archivo › Compartir › Publicar en la web).</div>'; });
+}
+function parseCSV(t){
+  var rows = [], row = [], cur = '', q = false;
+  for (var i = 0; i < t.length; i++) {
+    var c = t[i];
+    if (q) { if (c === '"') { if (t[i+1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && t[i+1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+/* ---------- publicar (GitHub) ---------- */
+function gh(){ return load(GH) || { usuario:'ignaciOoDROP', repo:'cripta-web', rama:'main', token:'' }; }
+function publicarUI(ed){
+  var g = gh();
+  ed.insertAdjacentHTML('beforeend',
+    (g.token ? '' : '<div class="note"><b>Configuración de una sola vez.</b> La web vive en GitHub (gratis). Para que este panel pueda publicar, necesita una "llave" de tu cuenta:</div>' +
+    '<ol class="how"><li>Entrá a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com › Settings › Fine-grained tokens</a>.</li>' +
+    '<li>Nombre: <b>panel cripta</b>. Expiración: la más larga. En <b>Repository access</b> elegí <b>Only select repositories</b> › <b>cripta-web</b>.</li>' +
+    '<li>En <b>Permissions › Repository permissions › Contents</b> elegí <b>Read and write</b>.</li>' +
+    '<li>Tocá <b>Generate token</b>, copiá la llave y pegala abajo. Queda guardada solo en este navegador.</li></ol>') +
+    '<div class="box">' + campoGH('usuario','Usuario de GitHub',g) + campoGH('repo','Repositorio',g) + campoGH('rama','Rama',g) + campoGH('token','Llave (token)',g,true) + '</div>' +
+    '<p style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-y" type="button" id="pub2">Publicar cambios</button>' +
+    '<button class="btn" type="button" id="bajar">Descargar copia (content.json)</button>' +
+    '<button class="btn" type="button" id="descartar">Descartar cambios sin publicar</button></p>' +
+    '<div id="pub-log"></div>');
+  $$('[data-gh]', ed).forEach(function(el){ el.oninput = function(){ var x = gh(); x[el.dataset.gh] = el.value.trim(); store(GH, x); }; });
+  $('#pub2').onclick = publicar;
+  $('#bajar').onclick = function(){
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(C, null, 1)], { type:'application/json' }));
+    a.download = 'content.json'; a.click();
+  };
+  $('#descartar').onclick = function(){
+    var b = $('#descartar');
+    if (b.dataset.sure) { store(BORRADOR, null); store(PENDIENTES, null); location.reload(); return; }
+    b.dataset.sure = 1; b.textContent = 'Tocá de nuevo para confirmar'; b.style.borderColor = 'var(--bad)';
+  };
+}
+function campoGH(k, label, g, secreto){
+  return '<div class="field"><label for="gh-' + k + '">' + label + '</label><input id="gh-' + k + '" type="' + (secreto ? 'password' : 'text') + '" data-gh="' + k + '" value="' + esc(g[k] || '') + '" autocomplete="off"></div>';
+}
+function b64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function api(g, path, opts){
+  opts = opts || {};
+  opts.headers = { 'Authorization':'Bearer ' + g.token, 'Accept':'application/vnd.github+json' };
+  return fetch('https://api.github.com/repos/' + g.usuario + '/' + g.repo + '/contents/' + path + (opts.method ? '' : '?ref=' + g.rama), opts);
+}
+function subir(g, path, base64, msg){
+  return api(g, path).then(function(r){ return r.ok ? r.json() : {}; }).then(function(cur){
+    return api(g, path, { method:'PUT', body:JSON.stringify({ message:msg, content:base64, branch:g.rama, sha:cur.sha }) });
+  }).then(function(r){ if (!r.ok) return r.json().then(function(e){ throw new Error(e.message || r.status); }); });
+}
+var publicando = false;
+function publicar(){
+  if (publicando) return;
+  var g = gh();
+  if (!g.token) { ir('publicar'); toast('Primero configurá la llave de GitHub'); return; }
+  publicando = true;
+  var btns = [$('#btn-publish'), $('#pub2')].filter(Boolean);
+  btns.forEach(function(b){ b.disabled = true; b.textContent = 'Publicando…'; });
+  var usadas = (C.fotosInstagram || []).filter(function(p){ return fotosNuevas[p]; });
+  var cadena = Promise.resolve();
+  usadas.forEach(function(p){ cadena = cadena.then(function(){ return subir(g, p, fotosNuevas[p].split(',')[1], 'Foto nueva desde el panel'); }); });
+  cadena.then(function(){
+    return subir(g, 'content.json', b64(JSON.stringify(C, null, 1) + '\n'), 'Cambios desde el panel');
+  }).then(function(){
+    fotosNuevas = {}; store(PENDIENTES, null); store(BORRADOR, null);
+    original = JSON.stringify(C); cambio(true);
+    log('ok', '<b>¡Publicado!</b> La web se actualiza en 1 o 2 minutos. Si no ves el cambio, recargá la página.');
+    toast('¡Publicado!');
+  }).catch(function(e){
+    var m = String(e.message || e);
+    var ayuda = /Bad credentials/i.test(m) ? 'La llave no es válida o venció. Generá una nueva.' :
+      /Not Found/i.test(m) ? 'No se encontró el repositorio o la llave no tiene permiso sobre él. Revisá usuario, repositorio y que la llave tenga Contents: Read and write.' : m;
+    log('bad', '<b>No se pudo publicar.</b> ' + esc(ayuda) + ' Tus cambios siguen guardados acá.');
+    ir('publicar');
+  }).then(function(){
+    publicando = false;
+    btns.forEach(function(b){ b.disabled = false; });
+    $('#btn-publish').textContent = 'Publicar'; var p2 = $('#pub2'); if (p2) p2.textContent = 'Publicar cambios';
+  });
+}
+function log(tipo, html){ var l = $('#pub-log'); if (l) l.innerHTML = '<div class="note ' + tipo + '">' + html + '</div>'; }
+
+/* ---------- estado, borrador y vista previa ---------- */
+var tPrev;
+function cambio(silencioso){
+  var sucio = JSON.stringify(C) !== original;
+  $('#status').classList.toggle('dirty', sucio);
+  $('#status-txt').textContent = sucio ? 'Cambios sin publicar' : 'Todo publicado';
+  if (sucio) store(BORRADOR, C); else store(BORRADOR, null);
+  clearTimeout(tPrev); tPrev = setTimeout(refrescarPreview, silencioso === true ? 0 : 600);
+}
+function refrescarPreview(){
+  // la vista previa lee el borrador desde localStorage; las fotos nuevas se muestran con su versión local
+  var copia = JSON.parse(JSON.stringify(C));
+  copia.fotosInstagram = (copia.fotosInstagram || []).map(fotoSrc);
+  try { localStorage.setItem('cripta-preview', JSON.stringify(copia)); } catch(e) {}
+  var f = $('#frame'), y = 0;
+  try { y = f.contentWindow.scrollY; } catch(e) {}
+  f.onload = function(){ try { f.contentWindow.scrollTo(0, y); f.contentDocument.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); }); } catch(e) {} };
+  f.src = 'index.html?preview=' + Date.now();
+}
+$('#btn-preview').onclick = function(){ refrescarPreview(); window.open('index.html?preview=1', '_blank'); };
+$('#btn-publish').onclick = publicar;
+$$('.preview-bar [data-size]').forEach(function(b){
+  b.onclick = function(){ $$('.preview-bar [data-size]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); $('#frame-wrap').classList.toggle('mobile', b.dataset.size === 'mobile'); };
+});
+$('#toggle-preview').onclick = function(){ var o = $('#app').classList.toggle('no-preview'); this.textContent = o ? 'Mostrar vista previa' : 'Ocultar vista previa'; };
+addEventListener('beforeunload', function(e){ if (JSON.stringify(C) !== original) { e.preventDefault(); e.returnValue = ''; } });
+
+var toastT;
+function toast(t){ var el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove('show'); }, 2200); }
+
+/* ---------- arranque ---------- */
+fetch('content.json?t=' + Date.now()).then(function(r){ return r.json(); }).then(function(pub){
+  original = JSON.stringify(pub);
+  var b = load(BORRADOR);
+  C = b || pub;
+  fotosNuevas = load(PENDIENTES) || {};
+  armarMenu();
+  var h = location.hash.slice(1);
+  ir(SECCIONES.some(function(s){ return s.id === h; }) ? h : 'portada');
+  cambio(true);
+  if (b) toast('Recuperé tus cambios sin publicar');
+}).catch(function(){
+  $('#editor').innerHTML = '<div class="note bad"><b>No se pudo cargar content.json.</b> Abrí el panel desde la web (no como archivo suelto).</div>';
+});
+})();
+</script>
+</body>
+</html>
