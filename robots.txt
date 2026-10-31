@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 
-Sitemap: https://ignacioodrop.github.io/cripta-web/sitemap.xml
+Sitemap: https://criptatec.github.io/sitemap.xml
